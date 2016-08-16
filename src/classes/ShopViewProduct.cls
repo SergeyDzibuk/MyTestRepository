@@ -18,7 +18,7 @@ public with sharing class ShopViewProduct {
         	ApexPages.addMessages(e);
         	return null;
     		}
-        
+        System.debug('! products: ' + products);
         PageReference newpage = new PageReference(System.currentPageReference().getURL());
         newpage.setRedirect(true); return newpage;
 
