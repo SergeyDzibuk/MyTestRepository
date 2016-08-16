@@ -1,0 +1,181 @@
+<apex:page showHeader="true" sidebar="false" standardController="Price__c" extensions="ShopViewProduct">
+    <apex:stylesheet value="{!$Resource.bootstrap}" />
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"/>
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"/>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
+	<apex:includeScript value="{!URLFOR($Resource.tablesorter, 'jquery.tablesorter.min.js')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.blue, 'style.css')}"/>
+     <script type="text/javascript">
+        $j = jQuery.noConflict();    
+        $j(document).ready(function () {
+        $j("[id$=theaddrs]").tablesorter();
+          }); 
+    </script>
+    
+    <head>
+        <style type="text/css">
+            html {height: 100%}
+            body {height: 100%; margin:0; padding:0;}
+            .add_product {width: 30%; float: right;}
+            .add_product input {width: 175px;}
+            .add_product .button {width: 75px;}
+            .search {width: 69.5%; float:left;}
+            .search input {width: 175px;}
+            .search .button {width: 75px;}
+            .search p {margin:2px 0 10px; } 
+            .headerdis {
+  				background-color: #F2F3F3;
+  				border: 1px solid #FFF;
+  				padding: 4px;
+            	font-weight: bold;
+				}
+
+        </style>
+    </head>
+         
+<body>
+    <apex:pageMessages />
+<apex:form styleClass="add_product">
+    <apex:pageBlock title="Add Product">
+        <apex:pageBlockSection columns="1" id="addIn">
+            <apex:inputField styleClass="form-control" value="{!Price__c.Name__c}"/>
+            <apex:inputField styleClass="form-control"  value="{!Price__c.Price__c}"/>
+            <apex:inputField styleClass="form-control" value="{!Price__c.Number__c}"/>
+            <apex:inputField styleClass="form-control" value="{!Price__c.Type__c}"/>
+            <apex:inputField styleClass="form-control" value="{!Price__c.Added_date__c}"/>
+            <apex:inputField styleClass="form-control" value="{!Price__c.Release_date__c}"/>
+            <apex:inputField styleClass="checkbox" value="{!Price__c.in_stock__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton styleClass="button" action="{!save}" value="Add"/>
+            <apex:commandButton styleClass="button" value="Clear" onclick="this.form.reset(); return false;"/>
+        </apex:pageBlockButtons>
+    </apex:pageBlock>
+</apex:form>
+    
+    <apex:form styleClass="search">
+        <apex:pageBlock title="Search">
+            <div style="width:52%">
+            <apex:pageBlockSection columns="4">
+                <p class="labelCol" style="width: 102%">Product Name</p><apex:inputText styleClass="form-control" value="{!SearchName}"/>
+                <p class="labelCol" style="width: 102%;">Added date</p><apex:inputText styleClass="form-control" value="{!SearchAdd_date}" id="SearchAdd_date" onfocus="DatePicker.pickDate(false,this,false);"/>
+            </apex:pageBlockSection>
+            </div>
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton styleClass="button" action="{!search}" value="Search"/>
+            <apex:commandButton styleClass="button" onclick="this.form.reset();return false;" value="Clear"/>
+            
+        </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageBlock title="Search result" rendered="{!openSearch}">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton styleClass="button" action="{!close}" value="Close" rendered="{!on_close}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection rendered="{!on_notfound}">
+                <h3>{!NotFound}</h3>
+            </apex:pageBlockSection>   
+            <apex:pageBlockSection columns="1">
+            <apex:pageBlockTable value="{!searchResult}" var="sitem" rendered="{!table_result}">
+                        
+            <apex:column headerValue="Product name">
+            <apex:outputField value="{!sitem.Name__c}"/>
+            </apex:column>
+            
+            <apex:column headerValue="Price">
+            <apex:outputText value="{0,number,currency}">
+            <apex:param value="{!sitem.Price__c}"/>
+            </apex:outputText>
+            </apex:column>
+            
+            <apex:column headerValue="Number">
+            <apex:outputText value="{0,number, ### ### ###}">
+                <apex:param value="{!sitem.Number__c}" />
+            </apex:outputText>
+            </apex:column>
+            
+            <apex:column headerValue="Type">
+            <apex:outputText value="{!sitem.Type__c}"/>
+            </apex:column>
+            
+            <apex:column headerValue="Added date">
+            <apex:outputText value="{0, date, d MMMM, EEE, yyyy}"> 
+                <apex:param value="{!sitem.Added_date__c}" />
+            </apex:outputText>
+            </apex:column>
+            
+            <apex:column headerValue="Release date">
+             <apex:outputText value="{0, date, d MMMM, EEE, yyyy}"> 
+                <apex:param value="{!sitem.Release_date__c}" />
+            </apex:outputText>
+            </apex:column>
+            
+            <apex:column headerValue="In stock">
+                <apex:outputText value="{!sitem.in_stock__c}"/> 
+            </apex:column>
+            
+        </apex:pageBlockTable>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+    
+    </apex:form>
+    
+    <apex:form styleClass="" style="font-size:16px;">
+    <apex:pageBlock title="List All Products">
+        <table id="theaddrs" class="tablesorter list">
+            <thead>
+            <tr>
+                <td class="headerdis">Action</td>
+                <th class="header">Product Name</th>
+                <th class="header">Price</th>
+                <th class="header">Number</th>
+                <th class="header">Type</th>
+				<th class="header">Added date</th>
+                <th class="header">Release date</th>
+                <th class="header">In stock</th>
+            </tr>
+            </thead>
+            <tbody>
+            <apex:repeat value="{!products}" var="pitem">
+                <tr class="dataRow">
+                    <td class="dataCell">
+                        <apex:commandLink value="Delete" action="{!del}" styleClass="btn" style="text-decoration:none">
+                    		<apex:param name="selectedName" value="{!pitem.Name}" assignTo="{!selectedName}" id="param" />
+                		</apex:commandLink>
+                    </td>
+                    <td class="dataCell">
+                        <apex:outputText value="{!pitem.Name__c}" />
+                    </td>
+                    <td class="dataCell">
+                         <apex:outputText value="{0,number,currency}">
+                			<apex:param value="{!pitem.Price__c}" />
+            			</apex:outputText>
+                    </td>
+                    <td class="dataCell">
+                         <apex:outputText value="{0,number, ### ### ###}">
+                			<apex:param value="{!pitem.Number__c}" />
+            			</apex:outputText>
+                    </td>
+                    <td class="dataCell">
+                        <apex:outputText value="{!pitem.Type__c}" />
+                    </td>
+                    <td class="dataCell">
+						<apex:outputText value="{0, date, d MMMM, EEE, yyyy}">
+                			<apex:param value="{!pitem.Added_date__c}" />
+						</apex:outputText>
+                    </td>
+					<td class="dataCell">
+                         <apex:outputText value="{0, date, d MMMM, EEE, yyyy}">
+                			<apex:param value="{!pitem.Release_date__c}" />
+            			</apex:outputText>
+                    </td>
+                    <td class="dataCell">
+                        <apex:outputText value="{!pitem.in_stock__c}" />
+                    </td>
+                </tr>
+            </apex:repeat>
+            </tbody>
+        </table>
+        </apex:pageBlock>
+    </apex:form>  
+</body>  
+</apex:page>
