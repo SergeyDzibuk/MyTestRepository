@@ -121,6 +121,7 @@ public with sharing class ShopViewProduct {
     {	
      
         PageReference newpage = new PageReference(System.currentPageReference().getURL());
+        System.debug('! newpage: ' + newpage);
         newpage.setRedirect(true);
         on_close = false;
         table_result = false;
